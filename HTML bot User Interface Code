@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            text-align: center;
+        }
+        .chat-container {
+            width: 400px;
+            margin: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 10px;
+            height: 400px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+        }
+        .message {
+            margin: 5px;
+            padding: 8px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            text-align: right;
+            margin-left: 50%;
+        }
+        .bot-message {
+            background-color: #ddd;
+            text-align: left;
+            margin-right: 50%;
+        }
+        input {
+            width: 80%;
+            padding: 8px;
+            margin-top: 10px;
+        }
+        button {
+            padding: 8px;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Chat with KLEAN</h2>
+    <div class="chat-container" id="chat-box">
+        <div class="bot-message message">Hello! How can I assist you today?</div>
+    </div>
+    <input type="text" id="user-input" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        function sendMessage() {
+            let userInput = document.getElementById("user-input").value;
+            if (userInput.trim() === "") return;
+
+            let chatBox = document.getElementById("chat-box");
+
+            // Display user message
+            let userMessage = document.createElement("div");
+            userMessage.className = "user-message message";
+            userMessage.innerText = userInput;
+            chatBox.appendChild(userMessage);
+
+            // Send user input to Flask backend
+            fetch("/chat", {
+                method: "POST",
+                body: JSON.stringify({ message: userInput }),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                let botMessage = document.createElement("div");
+                botMessage.className = "bot-message message";
+                botMessage.innerText = data.response;
+                chatBox.appendChild(botMessage);
+
+                // Auto-scroll to latest message
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+
+            document.getElementById("user-input").value = "";
+        }
+    </script>
+</body>
+</html>
