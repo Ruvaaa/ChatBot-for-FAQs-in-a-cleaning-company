@@ -1,0 +1,77 @@
+import spacy
+
+# Load spaCy model
+nlp = spacy.load("en_core_web_md")
+
+# Define intents (questions and corresponding answers)
+faqs = {
+    "What is your return policy?": "Our return policy allows you to return products within 30 days of purchase.",
+    "How do I contact support?": "You can contact support via email at support@example.com.",
+    "Where are you located?": "We are located in New York City.",
+    "How much are your washing machines?": "Our washing machines cost from $150 to $500 depending on the model.",
+    "Thank you": "You are welcome.",
+    "How much do you hoovers cost?": "Our hoovers cost from $30 to $200 depending on the model and quality.",
+    "Do you take credit or payment plans?": "We offer personalized payment plans according to a person's needs, but do not sell on Credit.",
+    "What is your cheapest automated cleaning bot?": "Our cheapest automated cleaning bot would be the H33 SAMSUNG Hoover ECOM.",
+    "Which washing machine brand and model would you suggest for someone staying alone?": "I would suggest the LG WASH AND GO MINI which is a small\ncapacity washing machine that doesn't use too much water, power or space.",
+    "My power vacuum is making a lot of noise, what do i do to fix it?": "We apologise for the inconvenience, I suggest checking the power vacuum's\npipes and using a stick to clear any blocakges."
+}
+
+
+# Function to handle small talk
+def small_talk(user_input):
+    small_talk_phrases = {
+        "hello": "Hi! How can I assist you today?",
+        "hi": "Hello! How can I help you?",
+        "how are you": "I'm just a bot, but I'm doing great! How about you?",
+        "bye": "Goodbye! Have a great day!"
+    }
+
+    for phrase, response in small_talk_phrases.items():
+        if phrase in user_input.lower():
+            return response
+    return None
+
+
+# Function to find the best FAQ match
+def faq_chatbot(user_input):
+    # Check for small talk
+    small_talk_response = small_talk(user_input)
+    if small_talk_response:
+        return small_talk_response
+
+    # Process user input
+    doc_input = nlp(user_input)
+    best_match = None
+    highest_similarity = 0
+
+    # Check for similarity with each FAQ
+    for question, answer in faqs.items():
+        doc_question = nlp(question)
+        similarity = doc_input.similarity(doc_question)
+
+        # Track the highest similarity and return the best matching answer
+        if similarity > highest_similarity:
+            highest_similarity = similarity
+            best_match = answer
+
+    if highest_similarity > 0.7:  # Adjust the threshold as necessary
+        return best_match
+    else:
+        return "I'm sorry, I didn't understand that. Can you rephrase?"
+
+
+# Main chatbot loop
+def chatbot():
+    print("Hello! I'm here to assist you. I am KLEAN, your chatbot from TECH\nCLEANING SOLUTIONS. Ask me anything, or type 'bye' to exit.")
+    while True:
+        user_input = input("You: ")  # Get user input
+        if user_input.lower() == "bye":
+            print("Goodbye! Have a great day!")
+            break
+        response = faq_chatbot(user_input)
+        print("Bot:", response)
+
+
+# Start the chatbot
+chatbot()
